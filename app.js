@@ -15,6 +15,7 @@
 'use strict';
 
 // Global Imports
+
 const express = require('express');
 const twilio = require('twilio');
 const sgMail = require('@sendgrid/mail')
@@ -23,36 +24,40 @@ const bodyParser = express.urlencoded({
   extended: false,
 });
 
-// EXPRESS
+/**
+ * 
+ * Express 
+ * 
+ */
 
 const app = express();
 
-// TWILIO
-
-// const {TWILIO_NUMBER} = process.env;
-
-// if (!TWILIO_NUMBER) {
-//   console.log(
-//     'Please configure environment variables as described in README.md'
-//   );
-//   throw new Error(
-//     'Please configure environment variables as described in README.md'
-//   );
-// }
-
-// const twilioClient = new twilio(
-//   process.env.TWILIO_ACCOUNT_SID,
-//   process.env.TWILIO_AUTH_TOKEN
-// );
-
-// Setting the system 
-
-// const twilioClient = new twilio(
-//   process.env.TWILIO_ACCOUNT_SID,
-//   process.env.TWILIO_AUTH_TOKEN
-// );
+/**
+ * 
+ * Twillio
+ * 
+ * Comment: An alternate way to interact with the Twilio API can be found in the Github of the Google Docs.
+ * It uses the SMS / Message API and uses the function such as twilioClient.messageCreate(), etc.
+ * to send messages to users.
+ * 
+ * The boilerplate of that type of code can be either found in the Twilio API documentation or within the Google boilerplate
+ * 
+ * The code below has been strippped from the aforementioned boilerplate code and will only contain Twilio code related to sending
+ * emails
+ * 
+ * 
+ **/ 
 
 sgMail.setApiKey(PROCESS.ENV.TWILIO_API_KEY);
+
+/**
+ * 
+ * Function that sends email using the Twilio SendGrid API
+ * 
+ * @param {Object} req Request object passed from the Express handler function 
+ * @param {Object} res Response object passed from the Express handler function
+ * 
+ */
 
 function sendEmail (req, res) {
 
@@ -72,18 +77,39 @@ function sendEmail (req, res) {
     .send(msg)
     .then(() => {
       console.log('Email sent')
-      res.status(200).send('Email sent')
+      res.status(200).send('Email successfully sent.')
       return
     })
     .catch((error) => {
       console.error(error)
+      res.status(500).send('Server error detected.')
     })
 
 }
 
-// EXAMPLE CODE
+/*
+ * 
+ * Express Routes
+ * 
+ */
 
-app.get('/sms/send', async (req, res, next) => {
+
+
+app.get('/email', async (req, res, next) => {
+  
+  await sendEmail(req, res);
+
+  console.log('@sendEmail called.')
+
+});
+
+/**
+ * 
+ * Example code from GCP Github boilerplate to send sms using the Twilio API
+ * 
+ */
+
+ app.get('/sms/send', async (req, res, next) => {
   const {to} = req.query;
   if (!to) {
     res
@@ -103,17 +129,10 @@ app.get('/sms/send', async (req, res, next) => {
     next(err);
     return;
   }
-});
-
-// EXAMPLE CODE
-
-app.get('/email', async (req, res, next) => {
-  
-  await sendEmail(req, res);
-
-  console.log('@sendEmail called.')
 
 });
+
+
 
 // Start the server
 if (module === require.main) {
